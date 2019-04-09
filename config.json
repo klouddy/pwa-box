@@ -1,7 +1,7 @@
 {
   "reverseProxies": [
     {
-      "route": "/api",
+      "route": "/api2",
       "remoteServer": "http://localhost:3000"
     }
   ],

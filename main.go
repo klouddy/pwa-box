@@ -14,7 +14,7 @@ func main() {
 	var port = fmt.Sprintf(":%d", config.Port)
 	for indx, proxyConfig := range config.ReverseProxies {
 		proxyList = append(proxyList, NewProxy(proxyConfig.Route, proxyConfig.RemoteServer))
-		r.PathPrefix("/api").HandlerFunc(proxyList[indx].handle)
+		r.PathPrefix(proxyConfig.Route).HandlerFunc(proxyList[indx].handle)
 		fmt.Printf("Setup revers proxy at %s, redirecting to %s", proxyConfig.Route, proxyConfig.RemoteServer)
 	}
 	fs := http.FileServer(http.Dir(config.StaticFilesDir))
