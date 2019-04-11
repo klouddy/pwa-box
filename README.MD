@@ -1,4 +1,5 @@
 # PWA Box
+[![Build Status](https://travis-ci.com/klouddy/pwa-box.svg?branch=master)](https://travis-ci.com/klouddy/pwa-box)
 
 **PWA Box** is trying to simplify getting started creating `PWA` or `SPA` applications.  
 
