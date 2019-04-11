@@ -6,6 +6,11 @@ import (
 	"os"
 )
 
+type StaticApp struct {
+	Route     string `json:"route"`
+	Directory string `json:"directory"`
+}
+
 type ProxyInfo struct {
 	Route        string `json:"route"`
 	RemoteServer string `json:"remoteServer"`
@@ -14,7 +19,7 @@ type ProxyInfo struct {
 type Config struct {
 	ReverseProxies []ProxyInfo `json:"reverseProxies"`
 	Port           int         `json:"port"`
-	StaticFilesDir string      `json:"staticFilesDir"`
+	StaticApps     []StaticApp `json:"staticApps"`
 }
 
 func LoadConfiguration(file string) Config {

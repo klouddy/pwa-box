@@ -1,3 +1,3 @@
 module pwa-box
 
-require github.com/gorilla/mux v1.7.1 // indirect
+require github.com/gorilla/mux v1.7.1

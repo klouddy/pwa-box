@@ -5,6 +5,15 @@
       "remoteServer": "http://localhost:3000"
     }
   ],
-  "port": 4200,
-  "staticFilesDir": "./public"
+  "staticApps": [
+    {
+      "route": "/app",
+      "directory": "./public"
+    },
+    {
+      "route": "/static",
+      "directory": "./static"
+    }
+  ],
+  "port": 4200
 }
