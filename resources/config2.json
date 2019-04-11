@@ -1,0 +1,19 @@
+{
+  "reverseProxies": [
+    {
+      "route": "/config2-api",
+      "remoteServer": "http://localhost:3000"
+    }
+  ],
+  "staticApps": [
+    {
+      "route": "/app",
+      "directory": "./public"
+    },
+    {
+      "route": "/static",
+      "directory": "./static"
+    }
+  ],
+  "port": 4200
+}
