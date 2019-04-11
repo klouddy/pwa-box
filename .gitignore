@@ -2,3 +2,4 @@ public/
 *.iml
 .idea/
 node_modules/
+static/

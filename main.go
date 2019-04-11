@@ -1,45 +1,45 @@
 package main
 
 import (
-	"encoding/json"
+	"flag"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
-	"os"
 )
 
-type Config struct {
-	Port           int    `json:"port"`
-	StaticFilesDir string `json:"staticFilesDir"`
-}
+var proxyList []*Prox
 
 func main() {
-	fmt.Println("Hello world.")
-	config := LoadConfiguration("config.json")
-	port := fmt.Sprintf(":%d", config.Port)
-	fmt.Println("port", port)
-	proxy := NewProxy("http://localhost:3000")
-	http.HandleFunc("/proxyServer", ProxyServer)
 
-	http.HandleFunc("/", proxy.handle)
-	fs := http.FileServer(http.Dir(config.StaticFilesDir))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.ListenAndServe(port, nil)
+	//config file Location
+	configFileLocation := flag.String("config", "config.json", "Location of config file.")
+	flag.Parse()
+
+	// get config setup stuff.
+	var config = LoadConfiguration(*configFileLocation)
+	var port = fmt.Sprintf(":%d", config.Port)
+
+	r := mux.NewRouter()
+	//perform setup on mux
+	setupReverseProxies(config, r)
+	setupStaticApps(config, r)
+
+	// start server.
+	http.ListenAndServe(port, r)
 }
 
-func ProxyServer(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("in proxy server")
-	w.Write([]byte("Reverse proxy Server Running. "))
-}
-
-func LoadConfiguration(file string) Config {
-	var config Config
-	configFile, err := os.Open(file)
-	defer configFile.Close()
-	if err != nil {
-		fmt.Println(err.Error())
+func setupStaticApps(config Config, r *mux.Router) {
+	for _, appConfig := range config.StaticApps {
+		fs := http.FileServer(http.Dir(appConfig.Directory))
+		r.PathPrefix(appConfig.Route).Handler(http.StripPrefix(appConfig.Route, fs))
+		fmt.Printf("Setup static app for path %s. Serving content from: %s.\n", appConfig.Route, appConfig.Directory)
 	}
-	jsonParser := json.NewDecoder(configFile)
-	jsonParser.Decode(&config)
-	return config
+}
 
+func setupReverseProxies(config Config, r *mux.Router) {
+	for indx, proxyConfig := range config.ReverseProxies {
+		proxyList = append(proxyList, NewProxy(proxyConfig.Route, proxyConfig.RemoteServer))
+		r.PathPrefix(proxyConfig.Route).HandlerFunc(proxyList[indx].handle)
+		fmt.Printf("Setup revers proxy at %s, redirecting to %s \n", proxyConfig.Route, proxyConfig.RemoteServer)
+	}
 }
