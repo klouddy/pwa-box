@@ -19,5 +19,8 @@
       "directory": "./static"
     }
   ],
-  "port": 4200
+  "port": 4200,
+  "metrics": {
+    "endpoint": "/actuator/prometheus"
+  }
 }

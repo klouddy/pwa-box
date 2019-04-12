@@ -25,7 +25,8 @@ func main() {
 	setupReverseProxies(config, r)
 	setupStaticApps(config, r)
 
-	r.Handle("/metrics", promhttp.Handler())
+	fmt.Println("Setting metrics endpoint at ", config.Metrics.Endpoint)
+	r.Handle(config.Metrics.Endpoint, promhttp.Handler())
 
 	// start server.
 	http.ListenAndServe(port, r)
