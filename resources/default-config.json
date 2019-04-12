@@ -1,0 +1,14 @@
+{
+  "reverseProxies": [
+  ],
+  "staticApps": [
+    {
+      "route": "/app",
+      "directory": "./static"
+    }
+  ],
+  "metrics": {
+    "endpoint": "/metrics"
+  },
+  "port": 9898
+}
