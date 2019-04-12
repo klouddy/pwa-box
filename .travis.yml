@@ -1,1 +1,8 @@
 language: go
+
+jobs:
+  include:
+    - stage: Test Go
+      script: go test
+    - stage: Compile Go
+      script: go build
