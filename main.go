@@ -4,27 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 )
 
-var proxyList []*Prox
+var proxyService *ProxService
 
 func main() {
-
-	counter := prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "reverse_proxy_requests_total",
-			Help: "A counter for configured reverse proxies.",
-		},
-		[]string{"target"},
-	)
-
-	proxyMetrics := ProxyMetrics{Counter: counter}
-
-	// Register all of the metrics in the standard registry.
-	prometheus.MustRegister(proxyMetrics.Counter)
 
 	//config file Location
 	configFileLocation := flag.String("config", "config.json", "Location of config file.")
@@ -36,16 +22,13 @@ func main() {
 
 	r := mux.NewRouter()
 	//perform setup on mux
-	setupReverseProxies(config, r, proxyMetrics)
+	setupReverseProxies(config, r)
 	setupStaticApps(config, r)
 
 	r.Handle("/metrics", promhttp.Handler())
+
 	// start server.
 	http.ListenAndServe(port, r)
-}
-
-func setupMetrics() {
-
 }
 
 func setupStaticApps(config Config, r *mux.Router) {
@@ -56,11 +39,14 @@ func setupStaticApps(config Config, r *mux.Router) {
 	}
 }
 
-func setupReverseProxies(config Config, r *mux.Router, metrics ProxyMetrics) {
+func setupReverseProxies(config Config, r *mux.Router) {
+
+	proxyService = NewPoxService()
+
 	for indx, proxyConfig := range config.ReverseProxies {
-		proxyList = append(proxyList, NewProxy(proxyConfig.Route, proxyConfig.RemoteServer, metrics))
-		handler := http.HandlerFunc(proxyList[indx].handle)
-		r.PathPrefix(proxyConfig.Route).HandlerFunc(handler)
+		proxyService.AddNewProxy(proxyConfig.Route, proxyConfig.RemoteServer)
+		handler := http.HandlerFunc(proxyService.proxyList[indx].handle)
+		r.PathPrefix(proxyConfig.Route).Handler(handler)
 		fmt.Printf("Setup revers proxy at %s, redirecting to %s \n", proxyConfig.Route, proxyConfig.RemoteServer)
 	}
 }

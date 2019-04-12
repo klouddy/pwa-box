@@ -3,6 +3,10 @@
     {
       "route": "/api2",
       "remoteServer": "http://localhost:3000"
+    },
+    {
+      "route": "/api",
+      "remoteServer": "http://localhost:3001"
     }
   ],
   "staticApps": [
