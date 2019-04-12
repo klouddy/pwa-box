@@ -16,10 +16,15 @@ type ProxyInfo struct {
 	RemoteServer string `json:"remoteServer"`
 }
 
+type MetricsConfig struct {
+	Endpoint string `json:"endpoint"`
+}
+
 type Config struct {
-	ReverseProxies []ProxyInfo `json:"reverseProxies"`
-	Port           int         `json:"port"`
-	StaticApps     []StaticApp `json:"staticApps"`
+	ReverseProxies []ProxyInfo   `json:"reverseProxies"`
+	Port           int           `json:"port"`
+	StaticApps     []StaticApp   `json:"staticApps"`
+	Metrics        MetricsConfig `json:"metrics"`
 }
 
 func LoadConfiguration(file string) Config {

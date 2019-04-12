@@ -4,10 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 )
 
-var proxyList []*Prox
+var proxyService *ProxService
 
 func main() {
 
@@ -24,6 +25,9 @@ func main() {
 	setupReverseProxies(config, r)
 	setupStaticApps(config, r)
 
+	fmt.Println("Setting metrics endpoint at ", config.Metrics.Endpoint)
+	r.Handle(config.Metrics.Endpoint, promhttp.Handler())
+
 	// start server.
 	http.ListenAndServe(port, r)
 }
@@ -37,9 +41,13 @@ func setupStaticApps(config Config, r *mux.Router) {
 }
 
 func setupReverseProxies(config Config, r *mux.Router) {
+
+	proxyService = NewPoxService()
+
 	for indx, proxyConfig := range config.ReverseProxies {
-		proxyList = append(proxyList, NewProxy(proxyConfig.Route, proxyConfig.RemoteServer))
-		r.PathPrefix(proxyConfig.Route).HandlerFunc(proxyList[indx].handle)
+		proxyService.AddNewProxy(proxyConfig.Route, proxyConfig.RemoteServer)
+		handler := http.HandlerFunc(proxyService.proxyList[indx].handle)
+		r.PathPrefix(proxyConfig.Route).Handler(handler)
 		fmt.Printf("Setup revers proxy at %s, redirecting to %s \n", proxyConfig.Route, proxyConfig.RemoteServer)
 	}
 }

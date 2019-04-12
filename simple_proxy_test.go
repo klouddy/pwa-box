@@ -19,9 +19,9 @@ func TestProxyStripPath(t *testing.T) {
 		fmt.Fprintf(w, "done")
 	}))
 	defer ts.Close()
-
-	myProxy := NewProxy(basePathToStrip, ts.URL)
-	localTs := httptest.NewServer(http.HandlerFunc(myProxy.handle))
+	myProxService := NewPoxService()
+	myProxService.AddNewProxy(basePathToStrip, ts.URL)
+	localTs := httptest.NewServer(http.HandlerFunc(myProxService.proxyList[0].handle))
 
 	res, err := http.Get(localTs.URL + basePathToStrip)
 	if err != nil {

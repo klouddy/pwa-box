@@ -3,6 +3,10 @@
     {
       "route": "/api2",
       "remoteServer": "http://localhost:3000"
+    },
+    {
+      "route": "/api",
+      "remoteServer": "http://localhost:3001"
     }
   ],
   "staticApps": [
@@ -15,5 +19,8 @@
       "directory": "./static"
     }
   ],
-  "port": 4200
+  "port": 4200,
+  "metrics": {
+    "endpoint": "/actuator/prometheus"
+  }
 }
