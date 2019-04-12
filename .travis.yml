@@ -1,8 +1,7 @@
 language: go
+services:
+  - docker
 
-jobs:
-  include:
-    - stage: Test Go
-      script: go test
-    - stage: Compile Go
-      script: go build
+script:
+  - go build
+  - docker build -t klouddy/pwa-box .
