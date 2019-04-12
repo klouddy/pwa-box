@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ProxService struct {
@@ -25,7 +26,8 @@ type Prox struct {
 Metrics that the handle function will instrument
 */
 type ProxyMetrics struct {
-	Counter *prometheus.CounterVec
+	Counter        *prometheus.CounterVec
+	RequestSummary *prometheus.SummaryVec
 }
 
 func NewPoxService() *ProxService {
@@ -55,36 +57,57 @@ func (ps *ProxService) AddNewProxy(basePath string, target string) {
 
 /**
 Wrapper for reverse proxy handlerFunc.
+Collects metrics.
 */
 func (p *Prox) handle(w http.ResponseWriter, r *http.Request) {
 	mrw := NewMetricsResponseWriter(w)
+	now := time.Now()
 	p.proxy.ServeHTTP(mrw, r)
 	statusCode := mrw.statusCode
-	p.service.Metrics.Counter.With(prometheus.Labels{"target": p.target.Host, "status": strconv.Itoa(statusCode)}).Inc()
+	p.service.Metrics.Counter.With(prometheus.Labels{"target": p.target.Host, "status": strconv.Itoa(statusCode), "path": r.URL.Path}).Inc()
+	p.service.Metrics.RequestSummary.With(prometheus.Labels{"target": p.target.Host, "status": strconv.Itoa(statusCode), "path": r.URL.Path}).Observe(time.Since(now).Seconds())
 }
 
+/**
+Setup for metrics of proxy service object
+*/
 func (p *ProxService) generateMetrics() {
 	counter := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "reverse_proxy_requests_total",
+			Name: "pwa_box_reverse_proxy_requests_total",
 			Help: "A counter for configured reverse proxies.",
 		},
-		[]string{"target", "status"},
+		[]string{"target", "status", "path"},
 	)
 
-	p.Metrics = &ProxyMetrics{Counter: counter}
-	prometheus.MustRegister(p.Metrics.Counter)
+	sum := prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Name: "pwa_box_reverse_proxy_requests_durations",
+			Help: "Reverse proxy latencies in seconds"},
+		[]string{"target", "status", "path"})
+
+	p.Metrics = &ProxyMetrics{Counter: counter, RequestSummary: sum}
+	prometheus.MustRegister(p.Metrics.Counter, p.Metrics.RequestSummary)
 }
 
+/**
+gathers status code of response writer
+*/
 type metricsResponseWriter struct {
 	http.ResponseWriter
 	statusCode int
 }
 
+/**
+Creates new Metrics Response writer
+*/
 func NewMetricsResponseWriter(w http.ResponseWriter) *metricsResponseWriter {
 	return &metricsResponseWriter{w, http.StatusOK}
 }
 
+/**
+Function for metricsResponseWriter.
+*/
 func (mrw *metricsResponseWriter) WriteHeader(code int) {
 	mrw.statusCode = code
 	mrw.ResponseWriter.WriteHeader(code)
