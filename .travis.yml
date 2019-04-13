@@ -7,7 +7,6 @@ jobs:
       script: go build
     - stage: build docker
       script: docker build -t klouddy/pwa-box:0.0.1 .
-    - stage: deploy
       deploy:
         provider: script
         script: bash docker_push.sh
