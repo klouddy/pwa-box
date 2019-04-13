@@ -10,8 +10,6 @@ jobs:
       deploy:
         provider: script
         script: bash docker_push.sh
-        on:
-          all_branches: true
 env:
   matrix:
     secure: rGJmQgt+5EGiW7gSjPcJyrLljqdPH9eD3NIab8Wpy41eVmAHTrOyOeONW/9kbUiinKJD9e7HIl5xgwKOn1uAuu+cVQ5d8ObtbiSL796HEU6q8+FC99QBRg1LX+8kY4Lc3etCVTlA2l8l3XyqoRrxCIZdJwmyNaKheQkTtKrJtbyGm6O7OWLmNM2bH/PAtNwczGd1NanSZXZLfO8ncLPSSdTPu0GALvmRWnsJlKHuzAgBMTRdJAFgeh1fV4W7KdOIVvSghfqGUpc3U6DsXnRhxzbege97sVf+6koQWxYWC8jweyqzjHfXYPXElNDpJ0raKjXxD8Yc1MCKC3Rwo1V5xSXWdGn4BdWJwGyIjUQXidsJoRU3C8Cv57BcDB4cza0j0/m4ZO9EFLVLkdt2yFh7bmI78KsOC1p3+WvwMdgQ9ssJWjTmSgb7i1qyokvjup1sXdTD07q2xiHzeXpYA06N+yaYWDkeCPSjg2sBsIzuQW6HGO/GYHh3IVBt4tyZYiNqbK14cZ4HPs8SmMgM4KiwSsSMCvUG7oIb39ccFNmDvoQzK2acZhCkZ3/5/RUNmpOjNJHQJ4XY6SYP2Vipw8+xDSlGOXpF6684VF0ezNFQgpgKgHyazy1D6z17hsgAtAvXVaWporxjqbVp9o6El31c+YsHPxArnlTLI8R2GEAyZ1E=
