@@ -7,8 +7,10 @@ import (
 )
 
 type StaticApp struct {
-	Route     string `json:"route"`
-	Directory string `json:"directory"`
+	Name       string `json:"name"`
+	Route      string `json:"route"`
+	Directory  string `json:"directory"`
+	LoggerPath string `json:"loggerPath"`
 }
 
 type ProxyInfo struct {
@@ -37,7 +39,6 @@ func (c *Config) Validate() {
 	c.ValidateMetricsOrDefault()
 	// port number exists
 	c.ValidatePortOrDefault()
-
 }
 
 /**
@@ -72,6 +73,7 @@ func (c *Config) ValidatePortOrDefault() {
 	}
 }
 
+// Loading config from json file.
 func LoadConfiguration(file string) Config {
 
 	var config Config
@@ -85,6 +87,7 @@ func LoadConfiguration(file string) Config {
 
 }
 
+// Loading config from []bytes as json string
 func LoadConfigByString(configTxt []byte) Config {
 	var config Config
 	err := json.Unmarshal(configTxt, &config)

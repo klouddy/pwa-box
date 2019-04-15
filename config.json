@@ -11,17 +11,21 @@
   ],
   "staticApps": [
     {
+      "name": "app1",
       "route": "/app",
-      "directory": "./public"
+      "directory": "./public",
+      "loggerPath": "/app1"
     },
     {
+      "name": "app2",
       "route": "/static",
-      "directory": "./static"
+      "directory": "./static",
+      "loggerPath": "/app2"
     }
   ],
   "port": 4200,
   "metrics": {
     "endpoint": "/actuator/prometheus"
   },
-  "logLevel": "INFO"
+  "logLevel": "WARN"
 }
