@@ -4,7 +4,11 @@ services:
 jobs:
   include:
     - stage: go
-      script: go build
+      script:
+        - go build
+        - go test -coverprofile=coverage.out
+        - go tool cover -func=coverage.out
+
     - stage: build docker
       script: docker build -t klouddy/pwa-box:0.0.1 .
       deploy:
