@@ -1,5 +1,6 @@
 # PWA Box
 [![Build Status](https://travis-ci.com/klouddy/pwa-box.svg?branch=master)](https://travis-ci.com/klouddy/pwa-box)
+[![Coverage Status](https://coveralls.io/repos/github/klouddy/pwa-box/badge.svg?branch=feature%2Fgobuild)](https://coveralls.io/github/klouddy/pwa-box?branch=master)
 
 **PWA Box** is trying to simplify getting started creating `PWA` or `SPA` applications.  
 

@@ -1,15 +1,20 @@
 language: go
-services:
-  - docker
 jobs:
   include:
     - stage: go
-      script: go build
+      before_install:
+        - go get github.com/mattn/goveralls
+      script:
+        - go build
+        - $HOME/gopath/bin/goveralls -v -service=travis-ci
     - stage: build docker
+      services:
+        - docker
       script: docker build -t klouddy/pwa-box:0.0.1 .
       deploy:
         provider: script
         script: bash docker_push.sh
 env:
   matrix:
-    secure: rGJmQgt+5EGiW7gSjPcJyrLljqdPH9eD3NIab8Wpy41eVmAHTrOyOeONW/9kbUiinKJD9e7HIl5xgwKOn1uAuu+cVQ5d8ObtbiSL796HEU6q8+FC99QBRg1LX+8kY4Lc3etCVTlA2l8l3XyqoRrxCIZdJwmyNaKheQkTtKrJtbyGm6O7OWLmNM2bH/PAtNwczGd1NanSZXZLfO8ncLPSSdTPu0GALvmRWnsJlKHuzAgBMTRdJAFgeh1fV4W7KdOIVvSghfqGUpc3U6DsXnRhxzbege97sVf+6koQWxYWC8jweyqzjHfXYPXElNDpJ0raKjXxD8Yc1MCKC3Rwo1V5xSXWdGn4BdWJwGyIjUQXidsJoRU3C8Cv57BcDB4cza0j0/m4ZO9EFLVLkdt2yFh7bmI78KsOC1p3+WvwMdgQ9ssJWjTmSgb7i1qyokvjup1sXdTD07q2xiHzeXpYA06N+yaYWDkeCPSjg2sBsIzuQW6HGO/GYHh3IVBt4tyZYiNqbK14cZ4HPs8SmMgM4KiwSsSMCvUG7oIb39ccFNmDvoQzK2acZhCkZ3/5/RUNmpOjNJHQJ4XY6SYP2Vipw8+xDSlGOXpF6684VF0ezNFQgpgKgHyazy1D6z17hsgAtAvXVaWporxjqbVp9o6El31c+YsHPxArnlTLI8R2GEAyZ1E=
+    - secure: rGJmQgt+5EGiW7gSjPcJyrLljqdPH9eD3NIab8Wpy41eVmAHTrOyOeONW/9kbUiinKJD9e7HIl5xgwKOn1uAuu+cVQ5d8ObtbiSL796HEU6q8+FC99QBRg1LX+8kY4Lc3etCVTlA2l8l3XyqoRrxCIZdJwmyNaKheQkTtKrJtbyGm6O7OWLmNM2bH/PAtNwczGd1NanSZXZLfO8ncLPSSdTPu0GALvmRWnsJlKHuzAgBMTRdJAFgeh1fV4W7KdOIVvSghfqGUpc3U6DsXnRhxzbege97sVf+6koQWxYWC8jweyqzjHfXYPXElNDpJ0raKjXxD8Yc1MCKC3Rwo1V5xSXWdGn4BdWJwGyIjUQXidsJoRU3C8Cv57BcDB4cza0j0/m4ZO9EFLVLkdt2yFh7bmI78KsOC1p3+WvwMdgQ9ssJWjTmSgb7i1qyokvjup1sXdTD07q2xiHzeXpYA06N+yaYWDkeCPSjg2sBsIzuQW6HGO/GYHh3IVBt4tyZYiNqbK14cZ4HPs8SmMgM4KiwSsSMCvUG7oIb39ccFNmDvoQzK2acZhCkZ3/5/RUNmpOjNJHQJ4XY6SYP2Vipw8+xDSlGOXpF6684VF0ezNFQgpgKgHyazy1D6z17hsgAtAvXVaWporxjqbVp9o6El31c+YsHPxArnlTLI8R2GEAyZ1E=
+    - secure: FiPRPBS1+WHt7KEPSlLuIWBGl15L4zGoKe7eYsotYtydC5tEalkQcU5vLs2+TUCrK9mQ18mCAWa4dvi0TtwjvB/r4gSKhxvU9CKIKor62q73y1F6pFfmb4H2GyhtV7M3Mhqr10b9HMC13GP2LTNv+fMR80iadQanrVVN2htOXS0/Xnqp1CuM4EPmJHs2S6VnCck3kbjRj9qjzYr7cSqZOmSFmjNPX3AtfISUGWvqQsFlwF9vqzKxYMuTjaRpqEgmmWsWDAIazQD1tsv8F+UnlL4XQm0Ksh3ZYXjdFA/3+hOi0BA/CpASm+bTXL+pEk/oRx7VGMOazFyXguOF/k0txWOikzhMirvIS+Q6fxlX4YXetoAt8ngEvtffpS9DglBDycjo2QCtN/TM8R4Dx1A3k8sVl3YR9KI+Fhn+9nvE3acRctGTrCKE+8p4eBGQi0L/VUSGm1c7tiimfQYFA4iRdg09vS7q1Na7fKb7njc0VkBSFuRT70D1ze8zOQ/B6oLwxtMsKpJnh3AM7lsp4bE232UwaxzAx+XnN397LjK0K4fHI3pnYO2rUbK5B9jmiTuVXSHp/bLm45jIL7SDw47TuPl5yWMoRX+oK4pOJWQ5sV84Lqg878dC3MHvP9X+w2jEBjTfqHmjXEWQdlLlNeHH7SrFYHGcYlwYApVGzsSqnGE=
