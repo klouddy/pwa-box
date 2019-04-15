@@ -31,14 +31,28 @@ type Config struct {
 var acceptableLogLevels = []string{"DEBUG", "INFO", "WARN", "ERROR"}
 
 func (c *Config) Validate() {
-	c.ValidateLevelWithDefault()
+
+	c.ValidateLevelOrDefault()
 	//default metrics endpoint
+	c.ValidateMetricsOrDefault()
 	// port number exists
+	c.ValidatePortOrDefault()
 
 }
 
-func (c *Config) ValidateLevelWithDefault() {
-	var isValid bool = false
+/**
+Validate metrics endpoint.  Use default if not correct.
+*/
+func (c *Config) ValidateMetricsOrDefault() {
+	if len(c.Metrics.Endpoint) == 0 {
+		log15.Warn("No route registered for metrics so using the default.")
+		c.Metrics.Endpoint = "/metrics"
+	}
+}
+
+// Validate log level.  Use default of warn if not correct.
+func (c *Config) ValidateLevelOrDefault() {
+	var isValid = false
 	// validate log level.
 	for _, curLvl := range acceptableLogLevels {
 		if curLvl == c.LogLevel {
@@ -47,6 +61,14 @@ func (c *Config) ValidateLevelWithDefault() {
 	}
 	if !isValid {
 		c.LogLevel = "WARN"
+	}
+}
+
+// Validate port. If it is incorrect use default.
+func (c *Config) ValidatePortOrDefault() {
+	if c.Port < 1 {
+		log15.Warn("Port not set correctly.  Using default.")
+		c.Port = 9898
 	}
 }
 
