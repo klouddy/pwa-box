@@ -22,5 +22,6 @@
   "port": 4200,
   "metrics": {
     "endpoint": "/actuator/prometheus"
-  }
+  },
+  "logLevel": "INFO"
 }

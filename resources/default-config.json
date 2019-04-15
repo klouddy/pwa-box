@@ -10,5 +10,6 @@
   "metrics": {
     "endpoint": "/metrics"
   },
-  "port": 9898
+  "port": 9898,
+  "logLevel": "WARN"
 }
