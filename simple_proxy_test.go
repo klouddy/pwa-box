@@ -28,5 +28,4 @@ func TestProxyStripPath(t *testing.T) {
 		log.Fatal(err)
 	}
 	assert.Equal(t, res.StatusCode, http.StatusOK)
-	assert.Equal(t, "bob", "notbob")
 }
