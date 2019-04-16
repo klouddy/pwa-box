@@ -1,4 +1,6 @@
 language: go
+services:
+  - docker
 jobs:
   include:
     - stage: go
@@ -7,10 +9,7 @@ jobs:
       script:
         - go build
         - $HOME/gopath/bin/goveralls -v -service=travis-ci
-    - stage: build docker
-      services:
-        - docker
-      script: docker build -t klouddy/pwa-box:0.0.1 .
+        - docker build -t klouddy/pwa-box:0.0.1 .
       deploy:
         provider: script
         script: bash docker_push.sh
