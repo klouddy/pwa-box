@@ -8,8 +8,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"strings"
 )
 
@@ -21,7 +19,6 @@ func BootstrapBox(c *Config) ProxService {
 	r := mux.NewRouter()
 	//perform setup on mux
 	proxyService := setupReverseProxies(c, r)
-	//setupReversePorxiesNew(c, r)
 	setupStaticApps(c, r)
 
 	fmt.Println("Setting metrics endpoint at ", c.Metrics.Endpoint)
@@ -76,17 +73,6 @@ func performAppLog(request *AppLogRequest, logger log15.Logger) {
 		logger.Error(request.Message)
 	default:
 		logger.Info(request.Message)
-	}
-}
-
-func setupReversePorxiesNew(config *Config, r *mux.Router) {
-
-	for _, config := range config.ReverseProxies {
-		r.PathPrefix(config.Route).HandlerFunc(func(writer http.ResponseWriter, r *http.Request) {
-			u, _ := url.Parse(config.RemoteServer)
-			revProxy := httputil.NewSingleHostReverseProxy(u)
-			revProxy.ServeHTTP(writer, r)
-		})
 	}
 }
 
