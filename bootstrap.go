@@ -8,16 +8,20 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"strings"
 )
 
-var loggers map[string]log15.Logger = make(map[string]log15.Logger)
+var appLogger log15.Logger
 
-func BootstrapBox(c *Config) {
+func BootstrapBox(c *Config) ProxService {
 	var port = fmt.Sprintf(":%d", c.Port)
 
 	r := mux.NewRouter()
 	//perform setup on mux
-	setupReverseProxies(c, r)
+	proxyService := setupReverseProxies(c, r)
+	//setupReversePorxiesNew(c, r)
 	setupStaticApps(c, r)
 
 	fmt.Println("Setting metrics endpoint at ", c.Metrics.Endpoint)
@@ -25,6 +29,7 @@ func BootstrapBox(c *Config) {
 
 	// start server.
 	http.ListenAndServe(port, r)
+	return proxyService
 }
 
 type AppLogRequest struct {
@@ -33,19 +38,30 @@ type AppLogRequest struct {
 }
 
 func setupStaticApps(config *Config, r *mux.Router) {
-	for _, appConfig := range config.StaticApps {
-		loggers[appConfig.Name] = log15.New("staticAppName", appConfig.Name)
-		fs := http.FileServer(http.Dir(appConfig.Directory))
-		r.PathPrefix(appConfig.Route).Handler(http.StripPrefix(appConfig.Route, fs))
-		r.HandleFunc("/loggers"+appConfig.LoggerPath, func(writer http.ResponseWriter, r *http.Request) {
-			var logReq AppLogRequest
-			b, _ := ioutil.ReadAll(r.Body)
-			json.Unmarshal(b, &logReq)
-			performAppLog(&logReq, loggers[appConfig.Name])
-			writer.WriteHeader(http.StatusCreated)
-		})
-		log15.Info(fmt.Sprintf("Setup static app for path %s. Serving content from: %s.  Logger path /loggers/%s", appConfig.Route, appConfig.Directory, appConfig.LoggerPath))
-	}
+	appConfig := config.StaticApps
+	appLogger = log15.New()
+
+	r.HandleFunc("/loggers"+appConfig.LoggerPath, func(writer http.ResponseWriter, r *http.Request) {
+		var logReq AppLogRequest
+		b, _ := ioutil.ReadAll(r.Body)
+		json.Unmarshal(b, &logReq)
+		performAppLog(&logReq, appLogger)
+		writer.WriteHeader(http.StatusCreated)
+	})
+
+	fs := http.FileServer(http.Dir(appConfig.Directory))
+	//r.PathPrefix(appConfig.Route).Handler(http.StripPrefix(appConfig.Route, fs))
+	r.PathPrefix(appConfig.Route).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		newPath := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, appConfig.Route), "/")
+		if !strings.Contains(newPath, ".") {
+			http.ServeFile(w, r, appConfig.Directory+"/index.html")
+		} else {
+			fmt.Println("equal")
+			http.StripPrefix(appConfig.Route, fs).ServeHTTP(w, r)
+		}
+	})
+	log15.Info(fmt.Sprintf("Setup static app for path %s. Serving content from: %s.  Logger path /loggers/%s", appConfig.Route, appConfig.Directory, appConfig.LoggerPath))
+
 }
 
 func performAppLog(request *AppLogRequest, logger log15.Logger) {
@@ -63,9 +79,20 @@ func performAppLog(request *AppLogRequest, logger log15.Logger) {
 	}
 }
 
-func setupReverseProxies(config *Config, r *mux.Router) {
+func setupReversePorxiesNew(config *Config, r *mux.Router) {
 
-	proxyService = NewPoxService()
+	for _, config := range config.ReverseProxies {
+		r.PathPrefix(config.Route).HandlerFunc(func(writer http.ResponseWriter, r *http.Request) {
+			u, _ := url.Parse(config.RemoteServer)
+			revProxy := httputil.NewSingleHostReverseProxy(u)
+			revProxy.ServeHTTP(writer, r)
+		})
+	}
+}
+
+func setupReverseProxies(config *Config, r *mux.Router) ProxService {
+
+	proxyService := NewPoxService()
 
 	for indx, proxyConfig := range config.ReverseProxies {
 		proxyService.AddNewProxy(proxyConfig.Route, proxyConfig.RemoteServer)
@@ -73,4 +100,6 @@ func setupReverseProxies(config *Config, r *mux.Router) {
 		r.PathPrefix(proxyConfig.Route).Handler(handler)
 		fmt.Printf("Setup revers proxy at %s, redirecting to %s \n", proxyConfig.Route, proxyConfig.RemoteServer)
 	}
+
+	return proxyService
 }

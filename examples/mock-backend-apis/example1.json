@@ -15,5 +15,17 @@
   ],
   "profile": {
     "name": "typicode"
-  }
+  },
+  "users": [
+    {
+      "id": 1,
+      "name": "bob",
+      "contacts": [
+        {
+          "type": "email",
+          "value": "bob@bob.com"
+        }
+      ]
+    }
+  ]
 }

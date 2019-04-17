@@ -15,4 +15,5 @@ func main() {
 	// get config setup stuff.
 	var config = LoadConfiguration(*configFileLocation)
 	BootstrapBox(&config)
+
 }

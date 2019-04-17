@@ -1,31 +1,22 @@
 {
   "reverseProxies": [
     {
-      "route": "/api2",
-      "remoteServer": "http://localhost:3000"
-    },
-    {
       "route": "/api",
-      "remoteServer": "http://localhost:3001"
-    }
-  ],
-  "staticApps": [
-    {
-      "name": "app1",
-      "route": "/app",
-      "directory": "./public",
-      "loggerPath": "/app1"
+      "remoteServer": "http://apidev.gentex.com/employeedemo/v1"
     },
     {
-      "name": "app2",
-      "route": "/static",
-      "directory": "./static",
-      "loggerPath": "/app2"
+      "route": "/localapi",
+      "remoteServer": "http://localhost:3000/users"
     }
   ],
+  "app": {
+    "route": "/",
+    "directory": "./public",
+    "loggerPath": "/logger"
+  },
   "port": 4200,
   "metrics": {
     "endpoint": "/actuator/prometheus"
   },
-  "logLevel": "WARN"
+  "logLevel": "INFO"
 }

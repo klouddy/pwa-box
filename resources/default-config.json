@@ -1,12 +1,10 @@
 {
   "reverseProxies": [
   ],
-  "staticApps": [
-    {
-      "route": "/app",
-      "directory": "./static"
-    }
-  ],
+  "app": {
+    "route": "/app",
+    "directory": "./static"
+  },
   "metrics": {
     "endpoint": "/metrics"
   },

@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"github.com/inconshreveable/log15"
 	"io/ioutil"
+	"strings"
 )
 
 type StaticApp struct {
-	Name       string `json:"name"`
 	Route      string `json:"route"`
 	Directory  string `json:"directory"`
 	LoggerPath string `json:"loggerPath"`
@@ -25,7 +25,7 @@ type MetricsConfig struct {
 type Config struct {
 	ReverseProxies []ProxyInfo   `json:"reverseProxies"`
 	Port           int           `json:"port"`
-	StaticApps     []StaticApp   `json:"staticApps"`
+	StaticApps     StaticApp     `json:"app"`
 	Metrics        MetricsConfig `json:"metrics"`
 	LogLevel       string        `json:"logLevel"`
 }
@@ -33,7 +33,7 @@ type Config struct {
 var acceptableLogLevels = []string{"DEBUG", "INFO", "WARN", "ERROR"}
 
 func (c *Config) Validate() {
-
+	c.sanitizePaths()
 	c.ValidateLevelOrDefault()
 	//default metrics endpoint
 	c.ValidateMetricsOrDefault()
@@ -70,6 +70,14 @@ func (c *Config) ValidatePortOrDefault() {
 	if c.Port < 1 {
 		log15.Warn("Port not set correctly.  Using default.")
 		c.Port = 9898
+	}
+}
+
+func (c *Config) sanitizePaths() {
+
+	c.StaticApps.Route = strings.TrimSuffix(c.StaticApps.Route, "/")
+	for _, proxy := range c.ReverseProxies {
+		proxy.Route = strings.TrimSuffix(proxy.Route, "/")
 	}
 }
 

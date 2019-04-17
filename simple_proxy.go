@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"net/http/httputil"
@@ -30,10 +31,10 @@ type ProxyMetrics struct {
 	RequestSummary *prometheus.SummaryVec
 }
 
-func NewPoxService() *ProxService {
+func NewPoxService() ProxService {
 	ps := ProxService{proxyList: make([]Prox, 0)}
 	ps.generateMetrics()
-	return &ps
+	return ps
 }
 
 func (ps *ProxService) AddNewProxy(basePath string, target string) {
@@ -46,9 +47,16 @@ func (ps *ProxService) AddNewProxy(basePath string, target string) {
 	curProxy.proxy.Director = func(r *http.Request) {
 		r.Header.Add("X-Forwarded-Host", r.Host)
 		r.Header.Add("X-Origin-Host", origin.Host)
+		r.Header.Add("Content-Type", "application/json")
 		r.URL.Scheme = origin.Scheme
 		r.URL.Host = origin.Host
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, basePath)
+		r.URL.Path = origin.Path + strings.TrimPrefix(r.URL.Path, *curProxy.hostBasePath)
+		fmt.Println("url: ", r.URL.Host, ", ", r.URL.Path)
+	}
+
+	curProxy.proxy.ModifyResponse = func(r *http.Response) error {
+		fmt.Println("response: ", r)
+		return nil
 	}
 	curProxy.service = ps
 	ps.proxyList = append(ps.proxyList, *curProxy)
@@ -62,6 +70,7 @@ Collects metrics.
 func (p *Prox) handle(w http.ResponseWriter, r *http.Request) {
 	mrw := NewMetricsResponseWriter(w)
 	now := time.Now()
+
 	p.proxy.ServeHTTP(mrw, r)
 	statusCode := mrw.statusCode
 	p.service.Metrics.Counter.With(prometheus.Labels{"target": p.target.Host, "status": strconv.Itoa(statusCode), "path": r.URL.Path}).Inc()
